@@ -1,41 +1,104 @@
 import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
   View,
   Text,
+  Alert,
   FlatList,
   StyleSheet,
-  Button,
+  SafeAreaView,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import {
+  decreaseQty,
+  searchItems,
   subscribeItems,
   deleteAllItems,
-  decreaseQty,
+  deleteSingleItem,
 } from "../../firestoreHelpers";
+import { db } from "../../firebaseConfig";
+import { TextInput } from "react-native-paper";
+import EditProductModal from "./EditProductModal";
+import { doc, updateDoc } from "firebase/firestore";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import CustomLoader from "./CustomLoader";
+import DeleteAllProduct from "./DeleteAllProduct";
 
 export default function AllProduct() {
   const [items, setItems] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = subscribeItems((items) => {
+      setFilteredItems(items);
+      setLoading(false); // stop loader after data fetch
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsub = subscribeItems((data) => {
+      // Sort latest first
+      const sorted = [...data].sort((a, b) => {
+        if (a.createdAt?.seconds && b.createdAt?.seconds) {
+          return b.createdAt.seconds - a.createdAt.seconds;
+        }
+        return 0;
+      });
+      setItems(sorted);
+      setFilteredItems(sorted);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleSearch = (text) => {
+    setSearchText(text);
+    if (text.trim() === "") {
+      setFilteredItems(items);
+    } else {
+      const lowerText = text.toLowerCase();
+      const filtered = items.filter(
+        (item) =>
+          item.name?.toLowerCase().includes(lowerText) ||
+          item.type?.toLowerCase().includes(lowerText)
+      );
+      setFilteredItems(filtered);
+    }
+  };
 
   useEffect(() => {
     const unsub = subscribeItems(setItems);
     return () => unsub();
   }, []);
 
-  const handleDeleteAll = () => {
+  // const handleDeleteAll = () => {
+  //   Alert.alert("Confirm Delete", "Delete all products?", [
+  //     { text: "Cancel", style: "cancel" },
+  //     {
+  //       text: "Delete",
+  //       style: "destructive",
+  //       onPress: async () => {
+  //         await deleteAllItems();
+  //       },
+  //     },
+  //   ]);
+  // };
+
+  const handleDeleteSingle = (id) => {
     Alert.alert(
       "Confirm Delete",
-      "Are you sure you want to delete all products?",
+      "Are you sure you want to delete this product?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete",
-          style: "destructive",
+          text: "Yes, Delete Product",
           onPress: async () => {
-            await deleteAllItems();
+            await deleteSingleItem(id);
+            setModalVisible(false);
           },
         },
       ]
@@ -43,36 +106,56 @@ export default function AllProduct() {
   };
 
   const handleDecreaseQuantity = (id, qty) => {
-    Alert.alert(
-      "Confirm Decrease",
-      "Are you sure you want to decrease this product's quantity?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes, Decrease",
-          style: "destructive",
-          onPress: async () => {
-            if (qty > 0) {
-              await decreaseQty(id);
-            }
+    if (qty > 0) {
+      Alert.alert(
+        "Confirm Decrease",
+        "Are you sure you want to decrease the quantity?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Yes, Decrease",
+            onPress: () => decreaseQty(id),
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!editItem) return;
+    const docRef = doc(db, "items", editItem.id);
+    await updateDoc(docRef, {
+      name: editItem.name,
+      type: editItem.type,
+      qty: Number(editItem.qty),
+      price: Number(editItem.price),
+    });
+    setModalVisible(false);
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.row}>
         <Text style={styles.name}>{item.name}</Text>
-        <View style={{flexDirection:"row",}}>
+        <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
-            style={styles.minusButton}
             onPress={() => handleDecreaseQuantity(item.id, item.qty)}
           >
-            <FontAwesome name="minus-square" size={24} color="black" />
+            <FontAwesome name="minus-square" size={24} color="#ef5350" />
           </TouchableOpacity>
-          <MaterialCommunityIcons name="dots-vertical-circle-outline" size={24} color="black" />
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => {
+              setEditItem(item);
+              setModalVisible(true);
+            }}
+          >
+            <MaterialCommunityIcons
+              name="dots-vertical"
+              size={24}
+              color="black"
+            />
+          </TouchableOpacity>
         </View>
       </View>
       <Text style={styles.detail}>Type: {item.type}</Text>
@@ -80,33 +163,53 @@ export default function AllProduct() {
         <Text style={styles.detail}>
           Quantity: <Text style={styles.PriceColor}>{item.qty}</Text>
         </Text>
-        <Text>
+        <Text style={styles.detail}>
           PKR: <Text style={styles.PriceColor}>{item.price}</Text>
         </Text>
       </View>
-
       <Text style={styles.date}>
-        Created:{" "}
-        {item.created?.toDate
-          ? item.created.toDate().toLocaleString()
-          : item.created || "N/A"}
+        Created:
+        <Text style={{ fontWeight: "bold" }}> {item.created || "N/A"}</Text>
       </Text>
     </View>
   );
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ margin: 16 }}>
+      {loading ? (
+        <CustomLoader />
+      ) : (
+        <>
+          {/* <View style={{ margin: 16 }}>
         <Button
           title="Delete All Products"
           color="red"
           onPress={handleDeleteAll}
         />
-      </View>
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
+      </View> */}
+      {/* <DeleteAllProduct /> */}
+          <TextInput
+            label="Search"
+            mode="outlined"
+            value={searchText}
+            onChangeText={handleSearch}
+            style={styles.searchInput}
+          />
+          <FlatList
+            data={filteredItems}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+          />
+          <EditProductModal
+            visible={modalVisible}
+            product={editItem}
+            onClose={() => setModalVisible(false)}
+            onSave={handleSaveChanges}
+            onDelete={handleDeleteSingle}
+            setProduct={setEditItem}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -123,23 +226,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    position: "relative",
   },
-  name: { fontSize: 20, fontWeight: "bold", marginBottom: 4, color: "#353839" },
-  detail: { fontSize: 16, color: "#333", marginBottom: 4 },
-  date: { fontSize: 12, color: "#999" },
-  PriceColor: {
-    color: "green",
-    fontWeight: "bold",
-    fontSize: 16,
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  minusButton: {
-    marginRight: 10,
-  },
-  minusText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 20,
+  name: { fontSize: 18, fontWeight: "bold" },
+  detail: { fontSize: 14, color: "#777", marginTop: 5, fontWeight: "bold" },
+  date: { fontSize: 12, color: "#777", marginTop: 5 },
+  PriceColor: { color: "green", fontWeight: "bold", fontSize: 18 },
+  iconButton: { marginLeft: 10 },
+  searchInput: {
+    margin: 16,
   },
 });

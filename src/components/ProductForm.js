@@ -4,20 +4,19 @@ import {
   Text,
   Keyboard,
   Platform,
-  TextInput,
   StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-  KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  Dimensions,
 } from "react-native";
+import { Modal } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
+import { TextInput, Button } from "react-native-paper";
 import { addItem } from "../../firestoreHelpers";
 import { serverTimestamp } from "firebase/firestore";
 
 const { width } = Dimensions.get("window");
 
-export default function ProductForm({ onClose }) {
+export default function ProductForm({ visible, onClose }) {
   const [name, setName] = useState("");
   const [qty, setQty] = useState("");
   const [type, setType] = useState("");
@@ -43,91 +42,92 @@ export default function ProductForm({ onClose }) {
       setPrice("");
       setError("");
 
-      onClose(); 
+      onClose();
     } catch (err) {
       setError("Error adding item. Please try again.");
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.modalBackground}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <Modal visible={visible} transparent animationType="fade">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.boxContainer}>
-          <View style={styles.headerContainer}>
-            <Text style={styles.header}>Add New Product</Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Add New Product</Text>
             <Entypo
               onPress={onClose}
               name="circle-with-cross"
-              size={24}
-              color="red"
+              size={26}
+              color="#ef5350"
+              style={styles.closeButton}
             />
-          </View>
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <TextInput
-            style={styles.input}
-            placeholder="Name"
-            value={name}
-            onChangeText={setName}
-          />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
             <TextInput
+              label="Name"
+              mode="outlined"
               style={styles.input}
-              placeholder="Type"
+              value={name}
+              onChangeText={setName}
+            />
+            <TextInput
+              label="Type"
+              mode="outlined"
+              style={styles.input}
               value={type}
               onChangeText={setType}
             />
-          <TextInput
-            style={styles.input}
-            placeholder="Quantity"
-            value={qty}
-            keyboardType="numeric"
-            onChangeText={setQty}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Price"
-            value={price}
-            keyboardType="numeric"
-            onChangeText={setPrice}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-            <Text style={styles.buttonText}>Add Item</Text>
-          </TouchableOpacity>
+            <TextInput
+              label="Quantity"
+              mode="outlined"
+              style={styles.input}
+              value={qty}
+              keyboardType="numeric"
+              onChangeText={setQty}
+            />
+            <TextInput
+              label="Price"
+              mode="outlined"
+              style={styles.input}
+              value={price}
+              keyboardType="numeric"
+              onChangeText={setPrice}
+            />
+            <Button
+              mode="contained"
+              style={styles.addButton}
+              onPress={handleAdd}
+            >
+              Add Item
+            </Button>
+          </View>
         </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalBackground: {
+  modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 20,
   },
-  boxContainer: {
-    width: width * 0.92,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+  modalContainer: {
+   backgroundColor: "#fff",
     padding: 20,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    borderRadius: 12,
+    width: "100%",
+    position: "relative",
   },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  header: {
+
+  modalTitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 15,
   },
   errorText: {
     color: "red",
@@ -135,22 +135,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
     marginBottom: 12,
-    padding: 10,
-    borderRadius: 8,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
   },
   addButton: {
-    backgroundColor: "#28a745",
-    padding: 12,
-    borderRadius: 10,
+    marginTop: 10,
+    backgroundColor: "#4CAF50",
   },
-  buttonText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "600",
+  closeButton: {
+    position: "absolute",
+    top: 20,
+    right: 15,
   },
 });

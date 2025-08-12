@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import {
   Modal,
   View,
-  SafeAreaView,
   StyleSheet,
+  SafeAreaView,
   TouchableOpacity,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import AllProduct from "../components/AllProduct";
 import ProductForm from "../components/ProductForm";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -22,20 +22,23 @@ export default function App() {
       >
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
-      <Modal visible={modalVisible} animationType="fade" transparent>
-        <ProductForm onClose={() => setModalVisible(false)} />
-      </Modal>
+      <View style={{}}>
+        <ProductForm
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+        />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "rgba(174, 174, 174, 0.5)" },
+  container: { flex: 1, },
   fab: {
     position: "absolute",
     bottom: 50,
     right: 20,
-    backgroundColor: "#007bff",
+    backgroundColor: "#356558c5",
     borderRadius: 50,
     padding: 16,
     elevation: 5,

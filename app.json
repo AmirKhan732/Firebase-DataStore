@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Database",
-    "slug": "Database",
+    "name": "MOTOAUTO",
+    "slug": "database",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,10 +20,17 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.amirmannan.Database"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "738d589f-ac52-48e7-87fd-42039bc6c2de"
+      }
+    },
+    "owner": "amirmannan"
   }
 }
