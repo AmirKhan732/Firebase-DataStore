@@ -6,6 +6,7 @@ import {
   Platform,
   StyleSheet,
   TouchableWithoutFeedback,
+  ActivityIndicator,
   Dimensions,
 } from "react-native";
 import { Modal } from "react-native";
@@ -22,29 +23,42 @@ export default function ProductForm({ visible, onClose }) {
   const [type, setType] = useState("");
   const [price, setPrice] = useState("");
   const [error, setError] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleAdd = async () => {
-    if (!name.trim() || !qty.trim() || !type.trim() || !price.trim()) {
+    if (
+      !name.trim() ||
+      !qty.trim() ||
+      !type.trim() ||
+      !price.trim() ||
+      !description.trim()
+    ) {
       setError("All fields are required.");
       return;
     }
+    setLoading(true); 
     try {
       await addItem({
         name: name.trim(),
         qty,
         type: type.trim(),
         price,
+        description: description.trim(),
         created: serverTimestamp(),
       });
       setName("");
       setQty("");
       setType("");
       setPrice("");
+      setDescription("");
       setError("");
 
       onClose();
     } catch (err) {
       setError("Error adding item. Please try again.");
+    } finally {
+      setLoading(false); // stop loader
     }
   };
 
@@ -68,6 +82,7 @@ export default function ProductForm({ visible, onClose }) {
               style={styles.input}
               value={name}
               onChangeText={setName}
+              activeOutlineColor="#326935c3"
             />
             <TextInput
               label="Type"
@@ -75,6 +90,7 @@ export default function ProductForm({ visible, onClose }) {
               style={styles.input}
               value={type}
               onChangeText={setType}
+              activeOutlineColor="#326935c3"
             />
             <TextInput
               label="Quantity"
@@ -83,6 +99,7 @@ export default function ProductForm({ visible, onClose }) {
               value={qty}
               keyboardType="numeric"
               onChangeText={setQty}
+              activeOutlineColor="#326935c3"
             />
             <TextInput
               label="Price"
@@ -91,14 +108,29 @@ export default function ProductForm({ visible, onClose }) {
               value={price}
               keyboardType="numeric"
               onChangeText={setPrice}
+              activeOutlineColor="#326935c3"
             />
-            <Button
-              mode="contained"
-              style={styles.addButton}
-              onPress={handleAdd}
-            >
-              Add Item
-            </Button>
+            <TextInput
+              label="Description"
+              mode="outlined"
+              style={styles.input}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={3}
+              activeOutlineColor="#326935c3"
+            />
+            {loading ? (
+              <ActivityIndicator size="large" color="#326935c3" />
+            ) : (
+              <Button
+                mode="contained"
+                style={styles.addButton}
+                onPress={handleAdd}
+              >
+                Add Item
+              </Button>
+            )}
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -115,7 +147,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modalContainer: {
-   backgroundColor: "#fff",
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 12,
     width: "100%",
@@ -139,7 +171,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: 10,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#326935c3",
   },
   closeButton: {
     position: "absolute",

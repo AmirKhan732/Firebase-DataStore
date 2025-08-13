@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,20 +6,22 @@ import {
   Keyboard,
   StyleSheet,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { TextInput, Button } from "react-native-paper";
 
 export default function EditProductModal({
+  onSave,
   visible,
   product,
   onClose,
-  onSave,
+  loading,
   onDelete,
   setProduct,
 }) {
   if (!product) return null;
-
+  
   return (
     <Modal
       visible={visible}
@@ -36,6 +38,7 @@ export default function EditProductModal({
               mode="outlined"
               style={styles.input}
               value={product.name}
+              activeOutlineColor="#326935c3"
               onChangeText={(text) => setProduct({ ...product, name: text })}
             />
             <TextInput
@@ -43,6 +46,7 @@ export default function EditProductModal({
               mode="outlined"
               style={styles.input}
               value={product.type}
+              activeOutlineColor="#326935c3"
               onChangeText={(text) => setProduct({ ...product, type: text })}
             />
             <TextInput
@@ -51,6 +55,7 @@ export default function EditProductModal({
               style={styles.input}
               value={String(product.qty)}
               keyboardType="numeric"
+              activeOutlineColor="#326935c3"
               onChangeText={(text) => setProduct({ ...product, qty: text })}
             />
             <TextInput
@@ -59,22 +64,39 @@ export default function EditProductModal({
               style={styles.input}
               value={String(product.price)}
               keyboardType="numeric"
+              activeOutlineColor="#326935c3"
               onChangeText={(text) => setProduct({ ...product, price: text })}
             />
-            <Button
-              mode="contained"
-              style={styles.saveButton}
-              onPress={onSave}
-            >
-              Save
-            </Button>
-            <Button
-              mode="contained"
-              style={styles.deleteButton}
-              onPress={() => onDelete(product.id)}
-            >
-              Delete Product
-            </Button>
+            <TextInput
+              label="Description"
+              mode="outlined"
+              style={styles.input}
+              value={product.description ?? ""}
+              activeOutlineColor="#326935c3"
+              onChangeText={(text) =>
+                setProduct({ ...product, description: text })
+              }
+            />
+            {loading ? (
+              <ActivityIndicator size="large" color="#326935c3" />
+            ) : (
+              <>
+                <Button
+                  mode="contained"
+                  style={styles.saveButton}
+                  onPress={onSave}
+                >
+                  Save
+                </Button>
+                <Button
+                  mode="contained"
+                  style={styles.deleteButton}
+                  onPress={() => onDelete(product.id)}
+                >
+                  Delete Product
+                </Button>
+              </>
+            )}
             <Entypo
               name="circle-with-cross"
               size={26}
@@ -116,7 +138,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: 10,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#326935c3",
   },
   deleteButton: {
     marginTop: 10,

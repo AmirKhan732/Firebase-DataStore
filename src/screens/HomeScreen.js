@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import {
-  Modal,
-  View,
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
@@ -21,13 +19,11 @@ export default function App() {
         onPress={() => setModalVisible(true)}
       >
         <Ionicons name="add" size={30} color="#fff" />
-      </TouchableOpacity>
-      <View style={{}}>
+      </TouchableOpacity>   
         <ProductForm
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
         />
-      </View>
     </SafeAreaView>
   );
 }
@@ -36,9 +32,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, },
   fab: {
     position: "absolute",
-    bottom: 50,
+    bottom: 30,
     right: 20,
-    backgroundColor: "#356558c5",
+    backgroundColor: "#326935cb",
     borderRadius: 50,
     padding: 16,
     elevation: 5,

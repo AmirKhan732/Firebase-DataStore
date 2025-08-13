@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
-export async function addItem({ name, qty, type, price }) {
+export async function addItem({ name, qty, type, price,description }) {
   const today = new Date();
   const createdDate = today.toISOString().split("T")[0];
 
@@ -22,6 +22,7 @@ export async function addItem({ name, qty, type, price }) {
     type,
     price: Number(price),
     created: createdDate,
+    description: description || "",
     createdAt: serverTimestamp(),
   });
 }

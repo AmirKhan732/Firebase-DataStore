@@ -1,28 +1,16 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Alert,
-  FlatList,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-} from "react-native";
+import { Alert, FlatList, StyleSheet, SafeAreaView } from "react-native";
 import {
   decreaseQty,
-  searchItems,
   subscribeItems,
-  deleteAllItems,
   deleteSingleItem,
 } from "../../firestoreHelpers";
+import ProductCard from "./ProductCard";
 import { db } from "../../firebaseConfig";
+import CustomLoader from "./CustomLoader";
 import { TextInput } from "react-native-paper";
 import EditProductModal from "./EditProductModal";
 import { doc, updateDoc } from "firebase/firestore";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import CustomLoader from "./CustomLoader";
-import DeleteAllProduct from "./DeleteAllProduct";
 
 export default function AllProduct() {
   const [items, setItems] = useState([]);
@@ -31,11 +19,14 @@ export default function AllProduct() {
   const [searchText, setSearchText] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false); // ✅ Loader for modal actions
+
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = subscribeItems((items) => {
       setFilteredItems(items);
-      setLoading(false); // stop loader after data fetch
+      setLoading(false);
     });
     return unsubscribe;
   }, []);
@@ -75,19 +66,6 @@ export default function AllProduct() {
     return () => unsub();
   }, []);
 
-  // const handleDeleteAll = () => {
-  //   Alert.alert("Confirm Delete", "Delete all products?", [
-  //     { text: "Cancel", style: "cancel" },
-  //     {
-  //       text: "Delete",
-  //       style: "destructive",
-  //       onPress: async () => {
-  //         await deleteAllItems();
-  //       },
-  //     },
-  //   ]);
-  // };
-
   const handleDeleteSingle = (id) => {
     Alert.alert(
       "Confirm Delete",
@@ -97,8 +75,13 @@ export default function AllProduct() {
         {
           text: "Yes, Delete Product",
           onPress: async () => {
-            await deleteSingleItem(id);
-            setModalVisible(false);
+            try {
+              setModalLoading(true); // ✅ Start loader
+              await deleteSingleItem(id);
+              setModalVisible(false);
+            } finally {
+              setModalLoading(false); // ✅ Stop loader
+            }
           },
         },
       ]
@@ -123,56 +106,21 @@ export default function AllProduct() {
 
   const handleSaveChanges = async () => {
     if (!editItem) return;
-    const docRef = doc(db, "items", editItem.id);
-    await updateDoc(docRef, {
-      name: editItem.name,
-      type: editItem.type,
-      qty: Number(editItem.qty),
-      price: Number(editItem.price),
-    });
-    setModalVisible(false);
+    try {
+      setModalLoading(true); 
+      const docRef = doc(db, "items", editItem.id);
+      await updateDoc(docRef, {
+        name: editItem.name,
+        type: editItem.type,
+        qty: Number(editItem.qty),
+        price: Number(editItem.price),
+        description: editItem.description,
+      });
+      setModalVisible(false);
+    } finally {
+      setModalLoading(false); 
+    }
   };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <Text style={styles.name}>{item.name}</Text>
-        <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity
-            onPress={() => handleDecreaseQuantity(item.id, item.qty)}
-          >
-            <FontAwesome name="minus-square" size={24} color="#ef5350" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => {
-              setEditItem(item);
-              setModalVisible(true);
-            }}
-          >
-            <MaterialCommunityIcons
-              name="dots-vertical"
-              size={24}
-              color="black"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <Text style={styles.detail}>Type: {item.type}</Text>
-      <View style={styles.row}>
-        <Text style={styles.detail}>
-          Quantity: <Text style={styles.PriceColor}>{item.qty}</Text>
-        </Text>
-        <Text style={styles.detail}>
-          PKR: <Text style={styles.PriceColor}>{item.price}</Text>
-        </Text>
-      </View>
-      <Text style={styles.date}>
-        Created:
-        <Text style={{ fontWeight: "bold" }}> {item.created || "N/A"}</Text>
-      </Text>
-    </View>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -180,25 +128,31 @@ export default function AllProduct() {
         <CustomLoader />
       ) : (
         <>
-          {/* <View style={{ margin: 16 }}>
-        <Button
-          title="Delete All Products"
-          color="red"
-          onPress={handleDeleteAll}
-        />
-      </View> */}
-      {/* <DeleteAllProduct /> */}
           <TextInput
             label="Search"
             mode="outlined"
             value={searchText}
             onChangeText={handleSearch}
             style={styles.searchInput}
+            activeOutlineColor="#326935ff"
           />
           <FlatList
             data={filteredItems}
             keyExtractor={(item) => item.id}
-            renderItem={renderItem}
+            renderItem={({ item }) => (
+              <ProductCard
+                item={item}
+                expanded={expandedId === item.id}
+                onToggleExpand={() =>
+                  setExpandedId(expandedId === item.id ? null : item.id)
+                }
+                onDecreaseQuantity={handleDecreaseQuantity}
+                onEdit={(product) => {
+                  setEditItem(product);
+                  setModalVisible(true);
+                }}
+              />
+            )}
           />
           <EditProductModal
             visible={modalVisible}
@@ -207,6 +161,7 @@ export default function AllProduct() {
             onSave={handleSaveChanges}
             onDelete={handleDeleteSingle}
             setProduct={setEditItem}
+            loading={modalLoading} // ✅ Pass down
           />
         </>
       )}
@@ -216,27 +171,6 @@ export default function AllProduct() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  card: {
-    backgroundColor: "#fff",
-    marginHorizontal: 12,
-    marginTop: 12,
-    padding: 10,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  name: { fontSize: 18, fontWeight: "bold" },
-  detail: { fontSize: 14, color: "#777", marginTop: 5, fontWeight: "bold" },
-  date: { fontSize: 12, color: "#777", marginTop: 5 },
-  PriceColor: { color: "green", fontWeight: "bold", fontSize: 18 },
-  iconButton: { marginLeft: 10 },
   searchInput: {
     margin: 16,
   },
