@@ -6,8 +6,10 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useNavigation } from "@react-navigation/native";
 
 export default function ProductCard({
   item,
@@ -19,45 +21,27 @@ export default function ProductCard({
   const heightAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
-
   const [contentHeight, setContentHeight] = useState(0);
+  const navigation = useNavigation();
 
   useEffect(() => {
+    const config = (toValue, duration) => ({
+      toValue,
+      duration,
+      useNativeDriver: false,
+    });
+
     if (expanded) {
       Animated.parallel([
-        Animated.timing(heightAnim, {
-          toValue: contentHeight,
-          duration: 250,
-          useNativeDriver: false,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: false,
-        }),
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: false,
-        }),
+        Animated.timing(heightAnim, config(contentHeight, 250)),
+        Animated.timing(opacityAnim, config(1, 250)),
+        Animated.timing(rotateAnim, config(1, 250)),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(heightAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-        Animated.timing(rotateAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: false,
-        }),
+        Animated.timing(heightAnim, config(0, 200)),
+        Animated.timing(opacityAnim, config(0, 200)),
+        Animated.timing(rotateAnim, config(0, 200)),
       ]).start();
     }
   }, [expanded, contentHeight]);
@@ -73,21 +57,6 @@ export default function ProductCard({
       <View style={styles.row}>
         <Text style={styles.name}>{item.name}</Text>
         <View style={styles.actionsRow}>
-          {item.description ? (
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={onToggleExpand}
-            >
-              <Animated.View style={{ transform: [{ rotate }] }}>
-                <MaterialCommunityIcons
-                  name="chevron-down"
-                  size={24}
-                  color="black"
-                />
-              </Animated.View>
-            </TouchableOpacity>
-          ) : null}
-
           <TouchableOpacity
             onPress={() => onDecreaseQuantity(item.id, item.qty)}
           >
@@ -110,44 +79,52 @@ export default function ProductCard({
       <Text style={styles.detail}>Type: {item.type}</Text>
       <View style={styles.row}>
         <Text style={styles.detail}>
-          Quantity: <Text style={styles.PriceColor}>{item.qty}</Text>
+          Quantity: <Text style={styles.price}>{item.qty}</Text>
         </Text>
         <Text style={styles.detail}>
-          PKR: <Text style={styles.PriceColor}>{item.price}</Text>
+          PKR: <Text style={styles.price}>{item.price}</Text>
         </Text>
       </View>
 
-      {item.description ? (
-        <Animated.View
-          style={{
-            height: heightAnim,
-            opacity: opacityAnim,
-            overflow: "hidden",
-          }}
-        >
-          <View
-            style={{ position: "absolute", top: 0, left: 0, right: 0 }}
-            onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
+      {item.description?.trim() ? (
+        <TouchableOpacity style={styles.iconButton} onPress={onToggleExpand}>
+          <Animated.View style={{ transform: [{ rotate }] }}>
+            <AntDesign name="downsquare" size={24} color="black" />
+          </Animated.View>
+        </TouchableOpacity>
+      ) : null}
+
+      {item.description?.trim() ? (
+        <>
+          <Animated.View
+            style={[
+              styles.animatedContent,
+              { height: heightAnim, opacity: opacityAnim },
+            ]}
           >
-            <Text style={styles.description}>{item.description}</Text>
-          </View>
-        </Animated.View>
+            <View
+              style={styles.absoluteFill}
+              onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
+            >
+              <Text style={styles.description}>{item.description}</Text>
+            </View>
+          </Animated.View>
+
+          {!expanded && <View style={styles.dashedLine} />}
+        </>
       ) : null}
-      {item.description?.trim() && !expanded ? (
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: "black",
-            borderStyle: "dashed",
-            marginTop: 15,
-            width: "100%",
-          }}
-        />
-      ) : null}
+
       <Text style={styles.date}>
-        Created:
-        <Text style={{ fontWeight: "bold" }}> {item.created || "N/A"}</Text>
+        Created: <Text style={styles.bold}>{item.created || "N/A"}</Text>
       </Text>
+      {item.editedAt && (
+        <Text style={styles.date}>
+          Last edited:{" "}
+          <Text style={styles.bold}>
+            {item.editedAt.toDate().toLocaleString()}
+          </Text>
+        </Text>
+      )}
     </View>
   );
 }
@@ -177,7 +154,26 @@ const styles = StyleSheet.create({
   name: { fontSize: 18, fontWeight: "bold" },
   detail: { fontSize: 14, color: "#777", marginTop: 5, fontWeight: "bold" },
   date: { fontSize: 12, color: "#777", marginTop: 10 },
-  PriceColor: { color: "green", fontWeight: "bold", fontSize: 18 },
+  price: { color: "green", fontWeight: "bold", fontSize: 18 },
   iconButton: { marginHorizontal: 8 },
-  description: { marginTop: 8, fontSize: 14, color: "#555" },
+  description: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#555",
+    borderWidth: 1,
+    borderColor: "black",
+    borderStyle: "dashed",
+    padding: 5,
+    borderRadius: 5,
+  },
+  animatedContent: { overflow: "hidden" },
+  absoluteFill: { position: "absolute", top: 0, left: 0, right: 0 },
+  dashedLine: {
+    borderBottomWidth: 1,
+    borderColor: "black",
+    borderStyle: "dashed",
+    marginTop: 5,
+    width: "100%",
+  },
+  bold: { fontWeight: "bold" },
 });

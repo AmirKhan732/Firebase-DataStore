@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, SafeAreaView } from "react-native";
+import {
+  Text,
+  Alert,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+} from "react-native";
 import {
   decreaseQty,
   subscribeItems,
@@ -8,9 +15,9 @@ import {
 import ProductCard from "./ProductCard";
 import { db } from "../../firebaseConfig";
 import CustomLoader from "./CustomLoader";
-import { TextInput } from "react-native-paper";
-import EditProductModal from "./EditProductModal";
+import { Button, TextInput } from "react-native-paper";
 import { doc, updateDoc } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 
 export default function AllProduct() {
   const [items, setItems] = useState([]);
@@ -19,9 +26,9 @@ export default function AllProduct() {
   const [searchText, setSearchText] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modalLoading, setModalLoading] = useState(false); // ✅ Loader for modal actions
-
+  const [modalLoading, setModalLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = subscribeItems((items) => {
@@ -66,28 +73,6 @@ export default function AllProduct() {
     return () => unsub();
   }, []);
 
-  const handleDeleteSingle = (id) => {
-    Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this product?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes, Delete Product",
-          onPress: async () => {
-            try {
-              setModalLoading(true); // ✅ Start loader
-              await deleteSingleItem(id);
-              setModalVisible(false);
-            } finally {
-              setModalLoading(false); // ✅ Stop loader
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const handleDecreaseQuantity = (id, qty) => {
     if (qty > 0) {
       Alert.alert(
@@ -101,24 +86,6 @@ export default function AllProduct() {
           },
         ]
       );
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    if (!editItem) return;
-    try {
-      setModalLoading(true); 
-      const docRef = doc(db, "items", editItem.id);
-      await updateDoc(docRef, {
-        name: editItem.name,
-        type: editItem.type,
-        qty: Number(editItem.qty),
-        price: Number(editItem.price),
-        description: editItem.description,
-      });
-      setModalVisible(false);
-    } finally {
-      setModalLoading(false); 
     }
   };
 
@@ -136,9 +103,11 @@ export default function AllProduct() {
             style={styles.searchInput}
             activeOutlineColor="#326935ff"
           />
+
           <FlatList
             data={filteredItems}
             keyExtractor={(item) => item.id}
+            contentContainerStyle={{ flexGrow: 1 }}
             renderItem={({ item }) => (
               <ProductCard
                 item={item}
@@ -147,21 +116,11 @@ export default function AllProduct() {
                   setExpandedId(expandedId === item.id ? null : item.id)
                 }
                 onDecreaseQuantity={handleDecreaseQuantity}
-                onEdit={(product) => {
-                  setEditItem(product);
-                  setModalVisible(true);
-                }}
+                onEdit={(product) =>
+                  navigation.navigate("EditProduct", { product })
+                }
               />
             )}
-          />
-          <EditProductModal
-            visible={modalVisible}
-            product={editItem}
-            onClose={() => setModalVisible(false)}
-            onSave={handleSaveChanges}
-            onDelete={handleDeleteSingle}
-            setProduct={setEditItem}
-            loading={modalLoading} // ✅ Pass down
           />
         </>
       )}

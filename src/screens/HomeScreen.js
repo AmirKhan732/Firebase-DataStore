@@ -1,29 +1,21 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, SafeAreaView, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AllProduct from "../components/AllProduct";
-import ProductForm from "../components/ProductForm";
+import { useNavigation } from "@react-navigation/native";
 
-export default function App() {
-  const [modalVisible, setModalVisible] = useState(false);
+export default function HomeScreen() {
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
       <AllProduct />
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setModalVisible(true)}
+        onPress={() => navigation.navigate("AddProduct")}
       >
         <Ionicons name="add" size={30} color="#fff" />
-      </TouchableOpacity>   
-        <ProductForm
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-        />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

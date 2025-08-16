@@ -2,6 +2,7 @@ import {
   doc,
   addDoc,
   getDocs,
+  getDoc,
   onSnapshot,
   deleteDoc,
   updateDoc,
@@ -12,33 +13,78 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
-export async function addItem({ name, qty, type, price,description }) {
+/**
+ * Add new item
+ */
+export async function addItem({
+  name,
+  qty,
+  type,
+  price,
+  description,
+  purchase_rate,
+  purchase_shop,
+}) {
   const today = new Date();
   const createdDate = today.toISOString().split("T")[0];
 
-  return await addDoc(collection(db, "items"), {
+  const docRef = await addDoc(collection(db, "items"), {
     name,
     qty: Number(qty),
     type,
     price: Number(price),
-    created: createdDate,
     description: description || "",
-    createdAt: serverTimestamp(),
+    purchase_rate: Number(purchase_rate) || 0,
+    purchase_shop: purchase_shop || "",
+    created: createdDate, // e.g. "2025-08-16"
+    createdAt: serverTimestamp(), // stays fixed
+    editedAt: serverTimestamp(), // same as createdAt on first insert
   });
+
+  // fetch resolved timestamps
+  const snap = await getDoc(docRef);
+  return { id: snap.id, ...snap.data() };
 }
 
+/**
+ * Get all items
+ */
 export async function getAllItems() {
   const snap = await getDocs(collection(db, "items"));
   return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
+/**
+ * Update an item (auto-updates editedAt)
+ */
+export async function updateItem(itemId, updates) {
+  const itemRef = doc(db, "items", itemId);
+  await updateDoc(itemRef, {
+    ...updates,
+    editedAt: serverTimestamp(), // refresh editedAt
+  });
+
+  const snap = await getDoc(itemRef);
+  return { id: snap.id, ...snap.data() };
+}
+
+/**
+ * Decrease quantity (also updates editedAt)
+ */
 export async function decreaseQty(itemId) {
   const itemRef = doc(db, "items", itemId);
   await updateDoc(itemRef, {
     qty: increment(-1),
+    editedAt: serverTimestamp(),
   });
+
+  const snap = await getDoc(itemRef);
+  return { id: snap.id, ...snap.data() };
 }
 
+/**
+ * Real-time listener
+ */
 export function subscribeItems(callback) {
   return onSnapshot(collection(db, "items"), (snapshot) => {
     const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -46,6 +92,9 @@ export function subscribeItems(callback) {
   });
 }
 
+/**
+ * Delete all items
+ */
 export const deleteAllItems = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "items"));
@@ -66,6 +115,9 @@ export const deleteAllItems = async () => {
   }
 };
 
+/**
+ * Delete single item
+ */
 export const deleteSingleItem = async (itemId) => {
   try {
     await deleteDoc(doc(db, "items", itemId));
@@ -74,4 +126,3 @@ export const deleteSingleItem = async (itemId) => {
     console.error("Error deleting item: ", error);
   }
 };
-

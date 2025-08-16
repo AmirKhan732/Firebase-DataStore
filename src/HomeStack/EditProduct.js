@@ -1,0 +1,205 @@
+// src/HomeStack/EditProduct.js
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import Entypo from "@expo/vector-icons/Entypo";
+import { TextInput, Button } from "react-native-paper";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
+import { deleteSingleItem } from "../../firestoreHelpers";
+
+export default function EditProduct({ route, navigation }) {
+  const { product: initialProduct } = route.params;
+  const [product, setProduct] = useState(initialProduct);
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const docRef = doc(db, "items", product.id);
+      await updateDoc(docRef, {
+        name: product.name,
+        type: product.type,
+        qty: Number(product.qty),
+        price: Number(product.price),
+        description: product.description,
+        purchase_rate: Number(product.purchase_rate),
+        purchase_shop: product.purchase_shop,
+      });
+      navigation.goBack();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = () => {
+    Alert.alert("Confirm Delete", "Are you sure you want to delete?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Yes, Delete",
+        onPress: async () => {
+          setLoading(true);
+          await deleteSingleItem(product.id);
+          setLoading(false);
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
+
+  const profit =
+    Number(product.price || 0) - Number(product.purchase_rate || 0);
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Entypo
+            name="arrow-left"
+            size={26}
+            color="#ef5350"
+            onPress={() => navigation.goBack()}
+          />
+          <Text style={styles.title}>Add New Product Details</Text>
+        </View>
+        <Text style={styles.profitText}>
+          Profit: {isNaN(profit) ? "0" : profit}
+        </Text>
+
+        <TextInput
+          label="Name"
+          mode="outlined"
+          style={styles.input}
+          value={product.name}
+          activeOutlineColor="#326935c3"
+          onChangeText={(text) => setProduct({ ...product, name: text })}
+        />
+        <TextInput
+          label="Type"
+          mode="outlined"
+          style={styles.input}
+          value={product.type}
+          activeOutlineColor="#326935c3"
+          onChangeText={(text) => setProduct({ ...product, type: text })}
+        />
+        <TextInput
+          label="Quantity"
+          mode="outlined"
+          style={styles.input}
+          value={String(product.qty)}
+          keyboardType="numeric"
+          activeOutlineColor="#326935c3"
+          onChangeText={(text) => setProduct({ ...product, qty: text })}
+        />
+        <TextInput
+          label="Price"
+          mode="outlined"
+          style={styles.input}
+          value={String(product.price)}
+          keyboardType="numeric"
+          activeOutlineColor="#326935c3"
+          onChangeText={(text) => setProduct({ ...product, price: text })}
+        />
+        <TextInput
+          label="Purchase Rate"
+          mode="outlined"
+          style={styles.input}
+          value={String(product.purchase_rate)}
+          keyboardType="numeric"
+          activeOutlineColor="#326935c3"
+          onChangeText={(text) =>
+            setProduct({ ...product, purchase_rate: text })
+          }
+        />
+        <TextInput
+          label="Purchase Shop"
+          mode="outlined"
+          style={styles.input}
+          value={product.purchase_shop}
+          activeOutlineColor="#326935c3"
+          onChangeText={(text) =>
+            setProduct({ ...product, purchase_shop: text })
+          }
+        />
+        <TextInput
+          label="Description"
+          mode="outlined"
+          style={styles.input}
+          value={product.description ?? ""}
+          activeOutlineColor="#326935c3"
+          onChangeText={(text) => setProduct({ ...product, description: text })}
+        />
+        {loading ? (
+          <ActivityIndicator size="large" color="#326935c3" />
+        ) : (
+          <>
+            <Button
+              mode="contained"
+              style={styles.saveButton}
+              onPress={handleSave}
+            >
+              Save
+            </Button>
+            <Button
+              mode="contained"
+              style={styles.deleteButton}
+              onPress={handleDelete}
+            >
+              Delete Product
+            </Button>
+          </>
+        )}
+      </View>
+    </TouchableWithoutFeedback>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 15,
+    color: "#333",
+  },
+  input: {
+    marginBottom: 12,
+  },
+  saveButton: {
+    marginTop: 10,
+    backgroundColor: "#326935c3",
+  },
+  deleteButton: {
+    marginTop: 10,
+    backgroundColor: "#ef5350",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  profitText: {
+    fontSize: 30,
+    fontWeight: "600",
+    color: "#326935c3",
+    marginVertical: 10,
+  },
+});
