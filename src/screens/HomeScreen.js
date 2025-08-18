@@ -24,8 +24,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, },
   fab: {
     position: "absolute",
-    bottom: 30,
-    right: 20,
+    bottom: 50,
+    right: 30,
     backgroundColor: "#326935cb",
     borderRadius: 50,
     padding: 16,

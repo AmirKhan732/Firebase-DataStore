@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  ScrollView,
   Platform,
+  Image,
+  StyleSheet,
+  ScrollView,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
-import { TextInput, Button } from "react-native-paper";
 import { addItem } from "../../firestoreHelpers";
+import { TextInput, Button } from "react-native-paper";
+
+import * as ImagePicker from "expo-image-picker";
 
 export default function ProductForm({ navigation }) {
   const [name, setName] = useState("");
@@ -22,6 +25,26 @@ export default function ProductForm({ navigation }) {
   const [purchaseShop, setPurchaseShop] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState(null);
+
+  const openCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry we need camera permission");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   const handleAdd = async () => {
     if (
@@ -49,7 +72,6 @@ export default function ProductForm({ navigation }) {
         purchase_shop: purchaseShop.trim(),
       });
 
-      // reset fields
       setName("");
       setQty("");
       setType("");
@@ -92,8 +114,23 @@ export default function ProductForm({ navigation }) {
           />
           <Text style={styles.title}>Add New Product Details</Text>
         </View>
+        <View>
+          <Button
+            style={styles.addButton}
+            mode="contained"
+            onPress={openCamera}
+          >
+            Image
+          </Button>
+          {image && (
+            <Image
+              source={{ uri: image }}
+              style={{ width: 200, height: 200, marginTop: 20 }}
+            />
+          )}
+          <Text>kljkdasgfk</Text>
+        </View>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
         <TextInput
           label="Name"
           mode="outlined"

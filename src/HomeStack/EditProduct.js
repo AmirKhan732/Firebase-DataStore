@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
   Alert,
+  ScrollView,
 } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { TextInput, Button } from "react-native-paper";
@@ -59,7 +60,7 @@ export default function EditProduct({ route, navigation }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Entypo
             name="arrow-left"
@@ -139,7 +140,7 @@ export default function EditProduct({ route, navigation }) {
         {loading ? (
           <ActivityIndicator size="large" color="#326935c3" />
         ) : (
-          <>
+          <View style={{ marginBottom: 35 }}>
             <Button
               mode="contained"
               style={styles.saveButton}
@@ -154,9 +155,9 @@ export default function EditProduct({ route, navigation }) {
             >
               Delete Product
             </Button>
-          </>
+          </View>
         )}
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
@@ -166,6 +167,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#fff",
+    // marginBottom:30
   },
   title: {
     fontSize: 20,

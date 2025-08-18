@@ -9,7 +9,6 @@ import {
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useNavigation } from "@react-navigation/native";
 
 export default function ProductCard({
   item,
@@ -22,7 +21,6 @@ export default function ProductCard({
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const [contentHeight, setContentHeight] = useState(0);
-  const navigation = useNavigation();
 
   useEffect(() => {
     const config = (toValue, duration) => ({
@@ -53,7 +51,6 @@ export default function ProductCard({
 
   return (
     <View style={styles.card}>
-      {/* Header */}
       <View style={styles.row}>
         <Text style={styles.name}>{item.name}</Text>
         <View style={styles.actionsRow}>
@@ -74,8 +71,6 @@ export default function ProductCard({
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Details */}
       <Text style={styles.detail}>Type: {item.type}</Text>
       <View style={styles.row}>
         <Text style={styles.detail}>
@@ -85,7 +80,6 @@ export default function ProductCard({
           PKR: <Text style={styles.price}>{item.price}</Text>
         </Text>
       </View>
-
       {item.description?.trim() ? (
         <TouchableOpacity style={styles.iconButton} onPress={onToggleExpand}>
           <Animated.View style={{ transform: [{ rotate }] }}>
@@ -93,7 +87,6 @@ export default function ProductCard({
           </Animated.View>
         </TouchableOpacity>
       ) : null}
-
       {item.description?.trim() ? (
         <>
           <Animated.View
@@ -109,15 +102,13 @@ export default function ProductCard({
               <Text style={styles.description}>{item.description}</Text>
             </View>
           </Animated.View>
-
           {!expanded && <View style={styles.dashedLine} />}
         </>
       ) : null}
-
       <Text style={styles.date}>
         Created: <Text style={styles.bold}>{item.created || "N/A"}</Text>
       </Text>
-      {item.editedAt && (
+      {item.editedAt?.toDate && (
         <Text style={styles.date}>
           Last edited:{" "}
           <Text style={styles.bold}>
