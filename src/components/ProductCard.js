@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
-  StyleSheet,
+  Image,
   Animated,
+  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -50,7 +51,16 @@ export default function ProductCard({
   });
 
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        item.qty < 6
+          ? { backgroundColor: "#ffebee" }
+          : item.qty < 11
+          ? { backgroundColor: "#fff3e0" }
+          : { backgroundColor: "#fff" },
+      ]}
+    >
       <View style={styles.row}>
         <Text style={styles.name}>{item.name}</Text>
         <View style={styles.actionsRow}>
@@ -99,6 +109,12 @@ export default function ProductCard({
               style={styles.absoluteFill}
               onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
             >
+              {item.image?.url && (
+                <Image
+                  source={{ uri: item.image.url }}
+                  style={styles.imageCloud}
+                />
+              )}
               <Text style={styles.description}>{item.description}</Text>
             </View>
           </Animated.View>
@@ -167,4 +183,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   bold: { fontWeight: "bold" },
+  imageCloud: {
+    width: "100%",
+    height: 250,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 10,
+    resizeMode: "stretch",
+  },
 });

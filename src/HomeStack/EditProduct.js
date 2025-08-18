@@ -1,25 +1,24 @@
-// src/HomeStack/EditProduct.js
 import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  Keyboard,
-  TouchableWithoutFeedback,
-  ActivityIndicator,
   Alert,
+  Keyboard,
+  StyleSheet,
   ScrollView,
+  ActivityIndicator,
+  TouchableWithoutFeedback,
 } from "react-native";
-import Entypo from "@expo/vector-icons/Entypo";
-import { TextInput, Button } from "react-native-paper";
-import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import Entypo from "@expo/vector-icons/Entypo";
+import { doc, updateDoc } from "firebase/firestore";
+import { TextInput, Button } from "react-native-paper";
 import { deleteSingleItem } from "../../firestoreHelpers";
 
 export default function EditProduct({ route, navigation }) {
   const { product: initialProduct } = route.params;
-  const [product, setProduct] = useState(initialProduct);
   const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState(initialProduct);
 
   const handleSave = async () => {
     try {
@@ -70,9 +69,17 @@ export default function EditProduct({ route, navigation }) {
           />
           <Text style={styles.title}>Add New Product Details</Text>
         </View>
-        <Text style={styles.profitText}>
-          Profit: {isNaN(profit) ? "0" : profit}
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.profitText}>
+            Profit: {isNaN(profit) ? "0" : profit}
+          </Text>
+        </View>
 
         <TextInput
           label="Name"

@@ -1,10 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, SafeAreaView } from "react-native";
-import { decreaseQty, subscribeItems } from "../../firestoreHelpers";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import {
+  Alert,
+  FlatList,
+  StyleSheet,
+  ScrollView,
+  BackHandler,
+  SafeAreaView,
+} from "react-native";
 import ProductCard from "./ProductCard";
 import CustomLoader from "./CustomLoader";
 import { TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import { decreaseQty, subscribeItems } from "../../firestoreHelpers";
 
 export default function AllProduct() {
   const [items, setItems] = useState([]);
@@ -12,18 +19,38 @@ export default function AllProduct() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const navigation = useNavigation();
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const backAction = () => {
+      if (inputRef.current?.isFocused()) {
+        inputRef.current.blur();
+        setSearchText("");
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = subscribeItems((data) => {
-      const sorted = [...data].sort((a, b) => {
+      const sortedByDate = [...data].sort((a, b) => {
         if (a.createdAt?.seconds && b.createdAt?.seconds) {
           return b.createdAt.seconds - a.createdAt.seconds;
         }
         return 0;
       });
-      setItems(sorted);
+      setItems(sortedByDate);
       setLoading(false);
     });
+
     return unsubscribe;
   }, []);
 
@@ -36,7 +63,12 @@ export default function AllProduct() {
     );
   });
 
-  const handleDecreaseQuantity = (id, qty) => {
+  const sortedFilteredItems = [...filteredItems].sort((a, b) => {
+    const priority = (item) => (item.qty < 5 ? 1 : item.qty < 10 ? 2 : 3);
+    return priority(a) - priority(b);
+  });
+
+  const handleDecreaseQuantity = useCallback((id, qty) => {
     if (qty > 0) {
       Alert.alert(
         "Confirm Decrease",
@@ -47,27 +79,27 @@ export default function AllProduct() {
         ]
       );
     }
-  };
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       {loading ? (
         <CustomLoader />
       ) : (
-        <>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <TextInput
-            label="Search"
+            ref={inputRef}
+            label="Search by name or type"
             mode="outlined"
             value={searchText}
             onChangeText={setSearchText}
             style={styles.searchInput}
             activeOutlineColor="#326935ff"
           />
-
           <FlatList
-            data={filteredItems}
+            data={sortedFilteredItems}
             keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
             renderItem={({ item }) => (
               <ProductCard
                 item={item}
@@ -83,7 +115,7 @@ export default function AllProduct() {
             )}
             ListEmptyComponent={<CustomLoader text="No products found" small />}
           />
-        </>
+        </ScrollView>
       )}
     </SafeAreaView>
   );

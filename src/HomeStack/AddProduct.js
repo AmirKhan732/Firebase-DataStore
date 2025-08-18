@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  Platform,
-  Image,
   StyleSheet,
-  ScrollView,
-  ActivityIndicator,
   KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  ActivityIndicator,
+  Image,
+  TouchableOpacity,
 } from "react-native";
-import Entypo from "@expo/vector-icons/Entypo";
-import { addItem } from "../../firestoreHelpers";
-import { TextInput, Button } from "react-native-paper";
-
 import * as ImagePicker from "expo-image-picker";
+import Entypo from "@expo/vector-icons/Entypo";
+import { TextInput, Button } from "react-native-paper";
+import { addItem } from "../../firestoreHelpers";
 
 export default function ProductForm({ navigation }) {
   const [name, setName] = useState("");
@@ -23,26 +23,21 @@ export default function ProductForm({ navigation }) {
   const [description, setDescription] = useState("");
   const [purchaseRate, setPurchaseRate] = useState("");
   const [purchaseShop, setPurchaseShop] = useState("");
+  const [imageUri, setImageUri] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState(null);
 
-  const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry we need camera permission");
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
+  // Pick an image
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.8,
     });
-
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImageUri(result.assets[0].uri);
+      console.log("Picked image:", result.assets[0].uri);
     }
   };
 
@@ -54,7 +49,6 @@ export default function ProductForm({ navigation }) {
       !price.trim() ||
       !description.trim() ||
       !purchaseRate.trim()
-      //   !purchaseShop.trim()
     ) {
       setError("All fields are required.");
       return;
@@ -62,7 +56,7 @@ export default function ProductForm({ navigation }) {
 
     setLoading(true);
     try {
-      await addItem({
+      const item = await addItem({
         name: name.trim(),
         qty,
         type: type.trim(),
@@ -70,7 +64,10 @@ export default function ProductForm({ navigation }) {
         description: description.trim(),
         purchase_rate: purchaseRate.trim(),
         purchase_shop: purchaseShop.trim(),
+        imageUri,
       });
+
+      // console.log("Item saved in Firestore:", item);
 
       setName("");
       setQty("");
@@ -79,10 +76,12 @@ export default function ProductForm({ navigation }) {
       setDescription("");
       setPurchaseRate("");
       setPurchaseShop("");
+      setImageUri(null);
       setError("");
 
       navigation.goBack();
     } catch (err) {
+      console.error("Error adding item:", err);
       setError("Error adding item. Please try again.");
     } finally {
       setLoading(false);
@@ -96,15 +95,11 @@ export default function ProductForm({ navigation }) {
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >
       <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          padding: 20,
-          backgroundColor: "#fff",
-        }}
+        contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
         <View style={styles.header}>
           <Entypo
             name="arrow-left"
@@ -112,25 +107,30 @@ export default function ProductForm({ navigation }) {
             color="#ef5350"
             onPress={() => navigation.goBack()}
           />
-          <Text style={styles.title}>Add New Product Details</Text>
+          <Text style={styles.title}>Add New Product</Text>
         </View>
-        <View>
-          <Button
-            style={styles.addButton}
-            mode="contained"
-            onPress={openCamera}
-          >
-            Image
-          </Button>
-          {image && (
+
+        {/* Error message */}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        {/* Image Picker */}
+        <TouchableOpacity style={styles.bgImagePicker} onPress={pickImage}>
+          {imageUri ? (
             <Image
-              source={{ uri: image }}
-              style={{ width: 200, height: 200, marginTop: 20 }}
+              source={{ uri: imageUri }}
+              style={styles.uploadedImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <Image
+              source={require("../assets/upload.png")}
+              style={styles.uploadPlaceholder}
+              resizeMode="contain"
             />
           )}
-          <Text>kljkdasgfk</Text>
-        </View>
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        </TouchableOpacity>
+
+        {/* Inputs */}
         <TextInput
           label="Name"
           mode="outlined"
@@ -139,6 +139,7 @@ export default function ProductForm({ navigation }) {
           onChangeText={setName}
           activeOutlineColor="#326935c3"
         />
+
         <TextInput
           label="Type"
           mode="outlined"
@@ -147,6 +148,7 @@ export default function ProductForm({ navigation }) {
           onChangeText={setType}
           activeOutlineColor="#326935c3"
         />
+
         <TextInput
           label="Quantity"
           mode="outlined"
@@ -156,6 +158,7 @@ export default function ProductForm({ navigation }) {
           onChangeText={setQty}
           activeOutlineColor="#326935c3"
         />
+
         <TextInput
           label="Price"
           mode="outlined"
@@ -165,11 +168,12 @@ export default function ProductForm({ navigation }) {
           onChangeText={setPrice}
           activeOutlineColor="#326935c3"
         />
-        <View style={styles.separator}>
+
+        <View style={styles.row}>
           <TextInput
             label="Purchase Rate"
             mode="outlined"
-            style={[styles.input, { width: "45%" }]}
+            style={[styles.input, styles.halfInput]}
             value={purchaseRate}
             keyboardType="numeric"
             onChangeText={setPurchaseRate}
@@ -178,12 +182,13 @@ export default function ProductForm({ navigation }) {
           <TextInput
             label="Purchase Shop"
             mode="outlined"
-            style={[styles.input, { width: "45%" }]}
+            style={[styles.input, styles.halfInput]}
             value={purchaseShop}
             onChangeText={setPurchaseShop}
             activeOutlineColor="#326935c3"
           />
         </View>
+
         <TextInput
           label="Description"
           mode="outlined"
@@ -195,6 +200,7 @@ export default function ProductForm({ navigation }) {
           activeOutlineColor="#326935c3"
         />
 
+        {/* Button */}
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -219,8 +225,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    gap: 10,
     marginBottom: 15,
   },
   title: {
@@ -233,6 +239,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
+  bgImagePicker: {
+    backgroundColor: "#f0f0f0",
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  uploadedImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 10,
+  },
+  uploadPlaceholder: {
+    width: 80,
+    height: 80,
+    opacity: 0.6,
+  },
   input: {
     marginBottom: 12,
   },
@@ -240,5 +264,11 @@ const styles = StyleSheet.create({
     marginTop: 15,
     backgroundColor: "#326935c3",
   },
-  separator: { flexDirection: "row", justifyContent: "space-between" },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  halfInput: {
+    width: "48%",
+  },
 });

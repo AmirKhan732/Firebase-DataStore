@@ -12,6 +12,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
+import { uploadToCloudinary } from "./src/services/uploadToCloudinary";
 
 export async function addItem({
   name,
@@ -21,9 +22,22 @@ export async function addItem({
   description,
   purchase_rate,
   purchase_shop,
+  imageUri,
 }) {
   const today = new Date();
   const createdDate = today.toISOString().split("T")[0];
+
+  let image = null;
+  if (imageUri) {
+    const c = await uploadToCloudinary(imageUri, "items");
+    image = {
+      url: c.secure_url,
+      publicId: c.public_id,
+      width: c.width,
+      height: c.height,
+      format: c.format,
+    };
+  }
 
   const docRef = await addDoc(collection(db, "items"), {
     name,
@@ -33,6 +47,7 @@ export async function addItem({
     description: description || "",
     purchase_rate: Number(purchase_rate) || 0,
     purchase_shop: purchase_shop || "",
+    image,
     created: createdDate,
     createdAt: serverTimestamp(),
     editedAt: serverTimestamp(),
@@ -49,8 +64,23 @@ export async function getAllItems() {
 
 export async function updateItem(itemId, updates) {
   const itemRef = doc(db, "items", itemId);
+
+  let imageUpdate = {};
+  if (updates.imageUri) {
+    const c = await uploadToCloudinary(updates.imageUri, "items");
+    imageUpdate.image = {
+      url: c.secure_url,
+      publicId: c.public_id,
+      width: c.width,
+      height: c.height,
+      format: c.format,
+    };
+    delete updates.imageUri;
+  }
+
   await updateDoc(itemRef, {
     ...updates,
+    ...imageUpdate,
     editedAt: serverTimestamp(),
   });
 
