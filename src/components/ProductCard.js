@@ -184,11 +184,16 @@ const styles = StyleSheet.create({
   },
   bold: { fontWeight: "bold" },
   imageCloud: {
-    width: "100%",
+    width: "97%",
+    alignSelf: "center",
     height: 250,
     borderRadius: 8,
     marginTop: 10,
     marginBottom: 10,
     resizeMode: "stretch",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });

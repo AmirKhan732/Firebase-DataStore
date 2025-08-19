@@ -27,6 +27,12 @@ export default function ProductForm({ navigation }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const checkIfToday = () => {
+    const today = new Date().toISOString().split("T")[0]; // format YYYY-MM-DD
+    const staticDate = "2025-08-20"; // static test date
+    return today === staticDate;
+  };
+
   // Pick an image
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -53,7 +59,6 @@ export default function ProductForm({ navigation }) {
       setError("All fields are required.");
       return;
     }
-
     setLoading(true);
     try {
       const item = await addItem({
@@ -66,9 +71,7 @@ export default function ProductForm({ navigation }) {
         purchase_shop: purchaseShop.trim(),
         imageUri,
       });
-
       // console.log("Item saved in Firestore:", item);
-
       setName("");
       setQty("");
       setType("");
@@ -92,28 +95,22 @@ export default function ProductForm({ navigation }) {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
     >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View style={styles.header}>
           <Entypo
             name="arrow-left"
-            size={26}
+            size={30}
             color="#ef5350"
             onPress={() => navigation.goBack()}
           />
           <Text style={styles.title}>Add New Product</Text>
         </View>
-
-        {/* Error message */}
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-        {/* Image Picker */}
         <TouchableOpacity style={styles.bgImagePicker} onPress={pickImage}>
           {imageUri ? (
             <Image
@@ -122,15 +119,19 @@ export default function ProductForm({ navigation }) {
               resizeMode="cover"
             />
           ) : (
-            <Image
-              source={require("../assets/upload.png")}
-              style={styles.uploadPlaceholder}
-              resizeMode="contain"
-            />
+            <>
+              <Image
+                source={require("../assets/upload.png")}
+                style={styles.uploadPlaceholder}
+                resizeMode="contain"
+              />
+              <Text style={{ fontWeight: "bold", fontStyle: "italic" }}>
+                Uploaod Image
+              </Text>
+            </>
           )}
         </TouchableOpacity>
-
-        {/* Inputs */}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
         <TextInput
           label="Name"
           mode="outlined"
@@ -228,6 +229,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginBottom: 15,
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 20,
@@ -262,7 +264,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: 15,
-    backgroundColor: "#326935c3",
+    backgroundColor: "#3a2c34ff",
   },
   row: {
     flexDirection: "row",

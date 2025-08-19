@@ -3,11 +3,13 @@ import {
   View,
   Text,
   Alert,
-  Keyboard,
+  Platform,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { db } from "../../firebaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -58,137 +60,135 @@ export default function EditProduct({ route, navigation }) {
     Number(product.price || 0) - Number(product.purchase_rate || 0);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <Entypo
-            name="arrow-left"
-            size={26}
-            color="#ef5350"
-            onPress={() => navigation.goBack()}
-          />
-          <Text style={styles.title}>Add New Product Details</Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
+          <View style={styles.header}>
+            <Entypo
+              name="arrow-left"
+              size={26}
+              color="#ef5350"
+              onPress={() => navigation.goBack()}
+            />
+            <Text style={styles.title}>Update Product Details</Text>
+          </View>
+
           <Text style={styles.profitText}>
             Profit: {isNaN(profit) ? "0" : profit}
           </Text>
-        </View>
 
-        <TextInput
-          label="Name"
-          mode="outlined"
-          style={styles.input}
-          value={product.name}
-          activeOutlineColor="#326935c3"
-          onChangeText={(text) => setProduct({ ...product, name: text })}
-        />
-        <TextInput
-          label="Type"
-          mode="outlined"
-          style={styles.input}
-          value={product.type}
-          activeOutlineColor="#326935c3"
-          onChangeText={(text) => setProduct({ ...product, type: text })}
-        />
-        <TextInput
-          label="Quantity"
-          mode="outlined"
-          style={styles.input}
-          value={String(product.qty)}
-          keyboardType="numeric"
-          activeOutlineColor="#326935c3"
-          onChangeText={(text) => setProduct({ ...product, qty: text })}
-        />
-        <TextInput
-          label="Price"
-          mode="outlined"
-          style={styles.input}
-          value={String(product.price)}
-          keyboardType="numeric"
-          activeOutlineColor="#326935c3"
-          onChangeText={(text) => setProduct({ ...product, price: text })}
-        />
-        <TextInput
-          label="Purchase Rate"
-          mode="outlined"
-          style={styles.input}
-          value={String(product.purchase_rate)}
-          keyboardType="numeric"
-          activeOutlineColor="#326935c3"
-          onChangeText={(text) =>
-            setProduct({ ...product, purchase_rate: text })
-          }
-        />
-        <TextInput
-          label="Purchase Shop"
-          mode="outlined"
-          style={styles.input}
-          value={product.purchase_shop}
-          activeOutlineColor="#326935c3"
-          onChangeText={(text) =>
-            setProduct({ ...product, purchase_shop: text })
-          }
-        />
-        <TextInput
-          label="Description"
-          mode="outlined"
-          style={styles.input}
-          value={product.description ?? ""}
-          activeOutlineColor="#326935c3"
-          onChangeText={(text) => setProduct({ ...product, description: text })}
-        />
-        {loading ? (
-          <ActivityIndicator size="large" color="#326935c3" />
-        ) : (
-          <View style={{ marginBottom: 35 }}>
-            <Button
-              mode="contained"
-              style={styles.saveButton}
-              onPress={handleSave}
-            >
-              Save
-            </Button>
-            <Button
-              mode="contained"
-              style={styles.deleteButton}
-              onPress={handleDelete}
-            >
-              Delete Product
-            </Button>
-          </View>
-        )}
-      </ScrollView>
-    </TouchableWithoutFeedback>
+          <TextInput
+            label="Name"
+            mode="outlined"
+            style={styles.input}
+            value={product.name}
+            activeOutlineColor="#326935c3"
+            onChangeText={(text) => setProduct({ ...product, name: text })}
+          />
+          <TextInput
+            label="Type"
+            mode="outlined"
+            style={styles.input}
+            value={product.type}
+            activeOutlineColor="#326935c3"
+            onChangeText={(text) => setProduct({ ...product, type: text })}
+          />
+          <TextInput
+            label="Quantity"
+            mode="outlined"
+            style={styles.input}
+            value={String(product.qty)}
+            keyboardType="numeric"
+            activeOutlineColor="#326935c3"
+            onChangeText={(text) => setProduct({ ...product, qty: text })}
+          />
+          <TextInput
+            label="Price"
+            mode="outlined"
+            style={styles.input}
+            value={String(product.price)}
+            keyboardType="numeric"
+            activeOutlineColor="#326935c3"
+            onChangeText={(text) => setProduct({ ...product, price: text })}
+          />
+          <TextInput
+            label="Purchase Rate"
+            mode="outlined"
+            style={styles.input}
+            value={String(product.purchase_rate)}
+            keyboardType="numeric"
+            activeOutlineColor="#326935c3"
+            onChangeText={(text) =>
+              setProduct({ ...product, purchase_rate: text })
+            }
+          />
+          <TextInput
+            label="Purchase Shop"
+            mode="outlined"
+            style={styles.input}
+            value={product.purchase_shop}
+            activeOutlineColor="#326935c3"
+            onChangeText={(text) =>
+              setProduct({ ...product, purchase_shop: text })
+            }
+          />
+          <TextInput
+            label="Description"
+            mode="outlined"
+            style={styles.input}
+            value={product.description ?? ""}
+            activeOutlineColor="#326935c3"
+            onChangeText={(text) =>
+              setProduct({ ...product, description: text })
+            }
+          />
+
+          {loading ? (
+            <ActivityIndicator size="large" color="#326935c3" />
+          ) : (
+            <View style={{ marginBottom: 35 }}>
+              <Button
+                mode="contained"
+                style={styles.saveButton}
+                onPress={handleSave}
+              >
+                Save
+              </Button>
+              <Button
+                mode="contained"
+                style={styles.deleteButton}
+                onPress={handleDelete}
+              >
+                Delete Product
+              </Button>
+            </View>
+          )}
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
     backgroundColor: "#fff",
-    // marginBottom:30
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 15,
-    color: "#333",
   },
   input: {
     marginBottom: 12,
   },
   saveButton: {
     marginTop: 10,
-    backgroundColor: "#326935c3",
+    backgroundColor: "#3a2c34ff",
   },
   deleteButton: {
     marginTop: 10,
@@ -196,14 +196,15 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 15,
   },
   title: {
+    flex: 1,
     fontSize: 20,
     fontWeight: "bold",
     color: "#333",
+    textAlign: "center",
   },
   profitText: {
     fontSize: 30,

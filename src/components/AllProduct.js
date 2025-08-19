@@ -64,7 +64,7 @@ export default function AllProduct() {
   });
 
   const sortedFilteredItems = [...filteredItems].sort((a, b) => {
-    const priority = (item) => (item.qty < 5 ? 1 : item.qty < 10 ? 2 : 3);
+    const priority = (item) => (item.qty < 5 ? 1 : item.qty < 11 ? 2 : 3);
     return priority(a) - priority(b);
   });
 
