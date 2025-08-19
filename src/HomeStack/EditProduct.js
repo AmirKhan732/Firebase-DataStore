@@ -12,7 +12,7 @@ import {
   Keyboard,
 } from "react-native";
 import { db } from "../../firebaseConfig";
-import Entypo from "@expo/vector-icons/Entypo";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { doc, updateDoc } from "firebase/firestore";
 import { TextInput, Button } from "react-native-paper";
 import { deleteSingleItem } from "../../firestoreHelpers";
@@ -71,14 +71,24 @@ export default function EditProduct({ route, navigation }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <Entypo
-              name="arrow-left"
-              size={26}
-              color="#ef5350"
+          {/* <View style={styles.header}>
+            <AntDesign
+              name="arrowleft"
+              size={24}
+              color="#3a2c34ff"
               onPress={() => navigation.goBack()}
             />
             <Text style={styles.title}>Update Product Details</Text>
+          </View> */}
+
+          <View style={styles.header}>
+            <AntDesign
+              name="arrowleft"
+              size={24}
+              color="#3a2c34ff"
+              onPress={() => navigation.goBack()}
+            />
+            <Text style={styles.title}>Edit Product Details</Text>
           </View>
 
           <Text style={styles.profitText}>
@@ -197,14 +207,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 10,
     marginBottom: 15,
+    justifyContent: "space-between",
   },
   title: {
-    flex: 1,
     fontSize: 20,
     fontWeight: "bold",
     color: "#333",
-    textAlign: "center",
   },
   profitText: {
     fontSize: 30,

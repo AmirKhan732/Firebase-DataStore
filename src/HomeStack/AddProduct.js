@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import Entypo from "@expo/vector-icons/Entypo";
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { TextInput, Button } from "react-native-paper";
 import { addItem } from "../../firestoreHelpers";
 
@@ -26,12 +26,6 @@ export default function ProductForm({ navigation }) {
   const [imageUri, setImageUri] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const checkIfToday = () => {
-    const today = new Date().toISOString().split("T")[0]; // format YYYY-MM-DD
-    const staticDate = "2025-08-20"; // static test date
-    return today === staticDate;
-  };
 
   // Pick an image
   const pickImage = async () => {
@@ -103,12 +97,8 @@ export default function ProductForm({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Entypo
-            name="arrow-left"
-            size={30}
-            color="#ef5350"
-            onPress={() => navigation.goBack()}
-          />
+         
+          <AntDesign name="arrowleft" size={24} color="#3a2c34ff"  onPress={() => navigation.goBack()}/>
           <Text style={styles.title}>Add New Product</Text>
         </View>
         <TouchableOpacity style={styles.bgImagePicker} onPress={pickImage}>
