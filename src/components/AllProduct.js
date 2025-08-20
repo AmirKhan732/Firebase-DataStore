@@ -89,12 +89,12 @@ export default function AllProduct() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <TextInput
             ref={inputRef}
-            label="Search by name or type"
+            label="Search by Name or Type"
             mode="outlined"
             value={searchText}
             onChangeText={setSearchText}
             style={styles.searchInput}
-            activeOutlineColor="#326935ff"
+            activeOutlineColor="#3a2c34ff"
           />
           <FlatList
             data={sortedFilteredItems}

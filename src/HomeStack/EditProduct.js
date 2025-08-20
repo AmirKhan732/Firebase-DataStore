@@ -4,16 +4,16 @@ import {
   Text,
   Alert,
   Platform,
+  Keyboard,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
 import { db } from "../../firebaseConfig";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { doc, updateDoc } from "firebase/firestore";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { TextInput, Button } from "react-native-paper";
 import { deleteSingleItem } from "../../firestoreHelpers";
 
@@ -71,16 +71,6 @@ export default function EditProduct({ route, navigation }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* <View style={styles.header}>
-            <AntDesign
-              name="arrowleft"
-              size={24}
-              color="#3a2c34ff"
-              onPress={() => navigation.goBack()}
-            />
-            <Text style={styles.title}>Update Product Details</Text>
-          </View> */}
-
           <View style={styles.header}>
             <AntDesign
               name="arrowleft"
@@ -153,14 +143,15 @@ export default function EditProduct({ route, navigation }) {
           <TextInput
             label="Description"
             mode="outlined"
-            style={styles.input}
+            multiline
+            style={[styles.input, { height: 100 }]}
+            contentStyle={{ textAlignVertical: "top" }}
             value={product.description ?? ""}
             activeOutlineColor="#326935c3"
             onChangeText={(text) =>
               setProduct({ ...product, description: text })
             }
           />
-
           {loading ? (
             <ActivityIndicator size="large" color="#326935c3" />
           ) : (
@@ -194,7 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   input: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   saveButton: {
     marginTop: 10,

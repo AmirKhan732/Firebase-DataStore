@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { deleteOldReports } from "../../firestoreHelpers";
 
 export default function DailyReports() {
   const [reports, setReports] = useState([]);
@@ -9,6 +10,9 @@ export default function DailyReports() {
 
   const fetchReports = async () => {
     try {
+
+      await deleteOldReports
+
       const q = query(
         collection(db, "reports"),
         orderBy("date", "desc"),

@@ -135,6 +135,48 @@ export const deleteSingleItem = async (itemId) => {
   }
 };
 
+export const deleteAllItems = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "items"));
+    if (querySnapshot.empty) {
+      console.log("No items to delete.");
+      return;
+    }
+
+    const batch = writeBatch(db);
+    querySnapshot.forEach((document) => {
+      batch.delete(doc(db, "items", document.id));
+    });
+
+    await batch.commit();
+    console.log("All items deleted successfully");
+  } catch (error) {
+    console.error("Error deleting items: ", error);
+  }
+};
+
+export const deleteOldReports = async () => {
+  try {
+    const today = new Date();
+    const snapshot = await getDocs(collection(db, "reports"));
+
+    for (const document of snapshot.docs) {
+      const data = document.data();
+      if (!data.date) continue; 
+
+      const reportDate = new Date(data.date);
+      const diffDays = Math.floor((today - reportDate) / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 7) {
+        await deleteDoc(doc(db, "reports", document.id));
+        console.log(`🗑️ Deleted old report: ${document.id}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error deleting old reports:", error);
+  }
+};
+
 export function subscribeItems(callback) {
   return onSnapshot(collection(db, "items"), (snapshot) => {
     const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));

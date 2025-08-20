@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  ScrollView,
-  Platform,
-  ActivityIndicator,
   Image,
+  Platform,
+  StyleSheet,
+  ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
+  KeyboardAvoidingView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { addItem } from "../../firestoreHelpers";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { TextInput, Button } from "react-native-paper";
-import { addItem } from "../../firestoreHelpers";
 
 export default function ProductForm({ navigation }) {
   const [name, setName] = useState("");
