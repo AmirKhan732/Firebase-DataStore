@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     marginHorizontal: 12,
-    marginBottom: 12,
+    margin: 12,
     padding: 12,
     borderRadius: 8,
     shadowColor: "#000",
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: -10,
   },
-  name: { fontSize: 18, fontWeight: "bold" },
+  name: { fontSize: 20, fontWeight: "bold" },
   detail: { fontSize: 14, color: "#777", marginTop: 5, fontWeight: "bold" },
   date: { fontSize: 12, color: "#777", marginTop: 10 },
   price: { color: "green", fontWeight: "bold", fontSize: 18 },

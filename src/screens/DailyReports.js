@@ -3,15 +3,16 @@ import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { deleteOldReports } from "../../firestoreHelpers";
+import LoadingComponent from "../components/LoadingComponent";
 
 export default function DailyReports() {
   const [reports, setReports] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true); 
 
   const fetchReports = async () => {
     try {
-
-      await deleteOldReports
+      await deleteOldReports;
 
       const q = query(
         collection(db, "reports"),
@@ -28,7 +29,6 @@ export default function DailyReports() {
         const before = details?.before ?? 0;
         const after = details?.after ?? 0;
 
-     
         const today = new Date();
         const reportDate = new Date(date);
         const diffDays = Math.floor(
@@ -62,6 +62,12 @@ export default function DailyReports() {
 
   useEffect(() => {
     fetchReports();
+    
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -75,7 +81,9 @@ export default function DailyReports() {
       <Text style={styles.productName}>{item.name}</Text>
       <Text style={styles.detail}>
         Decreased Item:{" "}
-        <Text style={{ fontWeight: "bold",fontSize:16 }}>{item.totalDecreased}</Text>
+        <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+          {item.totalDecreased}
+        </Text>
       </Text>
     </View>
   );
@@ -91,6 +99,15 @@ export default function DailyReports() {
       />
     </View>
   );
+
+  // ✅ Conditional render
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <LoadingComponent />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -114,6 +131,11 @@ export default function DailyReports() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   title: {
     fontSize: 25,
     fontWeight: "bold",
@@ -145,5 +167,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
   },
-  detail: { fontSize: 14, color: "#fff", textAlign: "center",alignItems: "center" },
+  detail: {
+    fontSize: 14,
+    color: "#fff",
+    textAlign: "center",
+    alignItems: "center",
+  },
 });

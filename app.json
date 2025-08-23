@@ -31,6 +31,10 @@
         "projectId": "738d589f-ac52-48e7-87fd-42039bc6c2de"
       }
     },
-    "owner": "amirmannan"
+    "owner": "amirmannan",
+    "plugins": [
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
+    ]
   }
 }
