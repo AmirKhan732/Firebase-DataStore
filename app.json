@@ -3,6 +3,7 @@
     "name": "MOTOAUTO",
     "slug": "database",
     "version": "1.0.0",
+    "scheme": "motoauto",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -32,9 +33,6 @@
       }
     },
     "owner": "amirmannan",
-    "plugins": [
-      "expo-web-browser",
-      "@react-native-google-signin/google-signin"
-    ]
+    "plugins": ["expo-web-browser"]
   }
 }
