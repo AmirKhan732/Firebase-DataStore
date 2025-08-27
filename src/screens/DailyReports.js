@@ -8,7 +8,7 @@ import LoadingComponent from "../components/LoadingComponent";
 export default function DailyReports() {
   const [reports, setReports] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   const fetchReports = async () => {
     try {
@@ -62,7 +62,7 @@ export default function DailyReports() {
 
   useEffect(() => {
     fetchReports();
-    
+
     const timer = setTimeout(() => {
       setLoading(false);
     }, 5000);
@@ -80,8 +80,8 @@ export default function DailyReports() {
     <View style={styles.card}>
       <Text style={styles.productName}>{item.name}</Text>
       <Text style={styles.detail}>
-        Decreased Item:{" "}
-        <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+        Decreased :{" "}
+        <Text style={{ fontWeight: "bold", fontSize: 20, color: "#fff" }}>
           {item.totalDecreased}
         </Text>
       </Text>
@@ -89,7 +89,7 @@ export default function DailyReports() {
   );
 
   const renderDay = ({ item }) => (
-    <View style={styles.daySection}>
+    <View>
       <Text style={styles.dateHeader}>{item.date}</Text>
       <FlatList
         data={item.products}
@@ -100,7 +100,6 @@ export default function DailyReports() {
     </View>
   );
 
-  // ✅ Conditional render
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
@@ -130,7 +129,7 @@ export default function DailyReports() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  container: { flex: 1, backgroundColor:"lightgray"},
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
@@ -143,18 +142,21 @@ const styles = StyleSheet.create({
     color: "#222",
     textAlign: "center",
   },
-  daySection: { marginBottom: 20 },
+
   dateHeader: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    // marginBottom: 10,
     color: "#326935",
     textAlign: "center",
   },
   card: {
-    backgroundColor: "#543948ff",
+    backgroundColor: "#564f4eff",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 14,
-    marginBottom: 10,
+    marginBottom: 2,
     borderRadius: 10,
     elevation: 2,
     width: "95%",

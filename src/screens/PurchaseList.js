@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
   },
   input: { marginBottom: 5, borderRadius: 5, height: 40 },
   button: { borderRadius: 15, width: "80%", alignSelf: "center" },
+
   tableHeader: {
     flexDirection: "row",
     borderBottomWidth: 2,
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     paddingVertical: 8,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderColor: "#ccc",
   },
   cell: {
