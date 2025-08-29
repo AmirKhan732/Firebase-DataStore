@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { deleteOldReports } from "../../firestoreHelpers";
 import LoadingComponent from "../components/LoadingComponent";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
 
 export default function DailyReports() {
   const [reports, setReports] = useState([]);
@@ -129,7 +129,7 @@ export default function DailyReports() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor:"lightgray"},
+  container: { flex: 1, backgroundColor: "lightgray" },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",

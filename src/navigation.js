@@ -58,7 +58,7 @@ function CustomDrawerContent(props) {
         let iconName = "dot-single";
         if (route.name === "Home") iconName = "home";
         if (route.name === "DailyReports") iconName = "calendar";
-        if (route.name === "Profile") iconName = "user";
+        if (route.name === "Settings") iconName = "cog";
         if (route.name === "PurchaseList") iconName = "list";
 
         return (
@@ -117,7 +117,7 @@ export default function AppNavigator() {
       >
         <Drawer.Screen name="Home" component={HomeStack} />
         <Drawer.Screen name="DailyReports" component={DailyReports} />
-        <Drawer.Screen name="Profile" component={ProfileScreen} />
+        <Drawer.Screen name="Settings" component={ProfileScreen} />
         <Drawer.Screen name ="PurchaseList" component={PurchaseList} />
       </Drawer.Navigator>
     </NavigationContainer>
