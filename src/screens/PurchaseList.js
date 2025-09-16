@@ -36,37 +36,37 @@ export default function PurchaseList() {
 
     const today = new Date().toISOString().split("T")[0];
     const html = `
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial; padding: 20px; }
-            h1 { text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h1>Product List (${today})</h1>
-          <table>
-            <tr>
-              <th>Product To Purchase</th>
-              <th>Quantity</th>
-            </tr>
-            ${items
-              .map(
-                (item) => `
-                <tr>
-                  <td>${item.name}</td>
-                  <td>${item.qty}</td>
-                </tr>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          h1 { text-align: center; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <h1>Product List (${today})</h1>
+        <table>
+          <tr>
+            <th>Product To Purchase</th>
+            <th>Quantity</th>
+          </tr>
+          ${items
+            .map(
+              (item) => `
+              <tr>
+                <td>${item.name}</td>
+                <td>${item.qty}</td>
+              </tr>
               `
-              )
-              .join("")}
-          </table>
-        </body>
-      </html>
-    `;
+            )
+            .join("")}
+        </table>
+      </body>
+    </html>
+  `;
 
     const { uri } = await Print.printToFileAsync({
       html,
@@ -78,6 +78,8 @@ export default function PurchaseList() {
     } else {
       Alert.alert("PDF saved", `Saved to: ${uri}`);
     }
+    await deleteOldSimpleItems();
+    setItems([]);
   };
 
   return (
@@ -102,7 +104,6 @@ export default function PurchaseList() {
       <Button mode="contained" style={styles.button} onPress={handleAdd}>
         Add Item
       </Button>
-
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}

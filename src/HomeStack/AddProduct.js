@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { addItem } from "../../firestoreHelpers";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { TextInput, Button } from "react-native-paper";
 
 export default function ProductForm({ navigation }) {
@@ -97,8 +97,12 @@ export default function ProductForm({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-         
-          <AntDesign name="arrowleft" size={24} color="#3a2c34ff"  onPress={() => navigation.goBack()}/>
+          <Ionicons
+            name="arrow-back-sharp"
+            size={24}
+            color="#3a2c34ff"
+            onPress={() => navigation.goBack()}
+          />
           <Text style={styles.title}>Add New Product</Text>
         </View>
         <TouchableOpacity style={styles.bgImagePicker} onPress={pickImage}>

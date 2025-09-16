@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   BackHandler,
   ScrollView,
@@ -83,7 +82,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -131,7 +130,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -157,3 +156,4 @@ const styles = StyleSheet.create({
     shadowRadius: 3.5,
   },
 });
+

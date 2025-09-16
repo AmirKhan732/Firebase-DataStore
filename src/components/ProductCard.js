@@ -10,6 +10,7 @@ import {
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function ProductCard({
   item,
@@ -91,9 +92,16 @@ export default function ProductCard({
         </Text>
       </View>
       {item.description?.trim() ? (
-        <TouchableOpacity style={styles.iconButton} onPress={onToggleExpand}>
+        <TouchableOpacity
+          style={[styles.iconButton, {}]}
+          onPress={onToggleExpand}
+        >
           <Animated.View style={{ transform: [{ rotate }] }}>
-            <AntDesign name="downsquare" size={24} color="black" />
+            <MaterialCommunityIcons
+              name="arrow-down-drop-circle"
+              size={24}
+              color="black"
+            />
           </Animated.View>
         </TouchableOpacity>
       ) : null}

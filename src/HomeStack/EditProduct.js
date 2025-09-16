@@ -13,9 +13,9 @@ import {
 } from "react-native";
 import { db } from "../../firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { TextInput, Button } from "react-native-paper";
 import { deleteSingleItem } from "../../firestoreHelpers";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function EditProduct({ route, navigation }) {
   const { product: initialProduct } = route.params;
@@ -72,8 +72,8 @@ export default function EditProduct({ route, navigation }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <AntDesign
-              name="arrowleft"
+            <Ionicons
+              name="arrow-back-sharp"
               size={24}
               color="#3a2c34ff"
               onPress={() => navigation.goBack()}
